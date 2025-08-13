@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Sandbox } from '@e2b/code-interpreter';
+import { appConfig } from '@/config/app.config';
 import type { SandboxState } from '@/types/sandbox';
 import type { ConversationState } from '@/types/conversation';
 
@@ -309,6 +310,12 @@ export async function POST(request: NextRequest) {
         
         // Store the reconnected sandbox globally for this instance
         global.activeSandbox = sandbox;
+        
+        // Extend timeout on reconnected sandbox if supported
+        if (typeof (sandbox as any).setTimeout === 'function') {
+          (sandbox as any).setTimeout(appConfig.e2b.timeoutMs);
+          console.log(`[apply-ai-code-stream] Extended sandbox timeout to ${appConfig.e2b.timeoutMinutes} minutes`);
+        }
         
         // Update sandbox data if needed
         if (!global.sandboxData) {

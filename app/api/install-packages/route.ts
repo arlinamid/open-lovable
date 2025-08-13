@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Sandbox } from '@e2b/code-interpreter';
+import { appConfig } from '@/config/app.config';
 
 declare global {
   var activeSandbox: any;
@@ -45,6 +46,12 @@ export async function POST(request: NextRequest) {
         sandbox = await Sandbox.connect(sandboxId, { apiKey: process.env.E2B_API_KEY });
         global.activeSandbox = sandbox;
         console.log(`[install-packages] Successfully reconnected to sandbox ${sandboxId}`);
+
+        // Ensure sandbox timeout is extended after reconnect
+        if (typeof (sandbox as any).setTimeout === 'function') {
+          (sandbox as any).setTimeout(appConfig.e2b.timeoutMs);
+          console.log(`[install-packages] Extended sandbox timeout to ${appConfig.e2b.timeoutMinutes} minutes`);
+        }
       } catch (error) {
         console.error(`[install-packages] Failed to reconnect to sandbox:`, error);
         return NextResponse.json({ 

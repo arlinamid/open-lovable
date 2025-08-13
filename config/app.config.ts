@@ -5,7 +5,7 @@ export const appConfig = {
   // E2B Sandbox Configuration
   e2b: {
     // Sandbox timeout in minutes
-    timeoutMinutes: 15,
+    timeoutMinutes: 45,
     
     // Convert to milliseconds for E2B API
     get timeoutMs() {
