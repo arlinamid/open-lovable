@@ -103,6 +103,8 @@ export default function AISandboxPage() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const chatMessagesRef = useRef<HTMLDivElement>(null);
   const codeDisplayRef = useRef<HTMLDivElement>(null);
+	const [showConsole, setShowConsole] = useState(false);
+	const [consoleOutput, setConsoleOutput] = useState<string>('');
   
   const [codeApplicationState, setCodeApplicationState] = useState<CodeApplicationState>({
     stage: null
@@ -119,7 +121,7 @@ export default function AISandboxPage() {
     thinkingText?: string;
     thinkingDuration?: number;
     currentFile?: { path: string; content: string; type: string };
-    files: Array<{ path: string; content: string; type: string; completed: boolean }>;
+    files: Array<{ path: string; content: string; type: string; completed: boolean; edited?: boolean }>;
     lastProcessedPosition: number;
     isEdit?: boolean;
   }>({
@@ -221,6 +223,25 @@ export default function AISandboxPage() {
       chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
     }
   }, [chatMessages]);
+
+	// Poll sandbox console logs when console is open
+	useEffect(() => {
+		if (!showConsole || !sandboxData?.sandboxId) return;
+		let cancelled = false;
+		const poll = async () => {
+			try {
+				const res = await fetch('/api/sandbox-logs');
+				const data = await res.json();
+				if (!cancelled) {
+					const logs = Array.isArray(data?.logs) ? data.logs.join('\n') : (data?.logs ?? '');
+					setConsoleOutput(typeof logs === 'string' ? logs : JSON.stringify(logs));
+				}
+			} catch {}
+			if (!cancelled) setTimeout(poll, 2000);
+		};
+		poll();
+		return () => { cancelled = true; };
+	}, [showConsole, sandboxData?.sandboxId]);
 
 
   const updateStatus = (text: string, active: boolean) => {
@@ -513,11 +534,12 @@ Tip: I automatically detect and install npm packages from your code imports (lik
                       stage: 'installing', 
                       packages: data.packages 
                     });
-                  } else if (data.message.includes('Creating files') || data.message.includes('Applying')) {
-                    setCodeApplicationState({ 
-                      stage: 'applying',
-                      filesGenerated: results.filesCreated 
-                    });
+                    } else if (data.message.includes('Creating files') || data.message.includes('Applying')) {
+                      setCodeApplicationState(prev => ({ 
+                        ...prev,
+                        stage: 'applying',
+                        filesGenerated: data.results?.filesCreated || []
+                      }));
                   }
                   break;
                   
@@ -629,7 +651,7 @@ Tip: I automatically detect and install npm packages from your code imports (lik
           });
           
           // Verify files were actually created by refreshing the sandbox if needed
-          if (sandboxData?.sandboxId && results.filesCreated.length > 0) {
+          if (sandboxData?.sandboxId && (data.results?.filesCreated?.length || 0) > 0) {
             // Small delay to ensure files are written
             setTimeout(() => {
               // Force refresh the iframe to show new files
@@ -640,9 +662,9 @@ Tip: I automatically detect and install npm packages from your code imports (lik
           }
         }
         
-        if (results.filesUpdated?.length > 0) {
+        if (data.results?.filesUpdated?.length > 0) {
           log('Files updated:');
-          results.filesUpdated.forEach((file: string) => {
+          data.results.filesUpdated.forEach((file: string) => {
             log(`  ${file}`, 'command');
           });
         }
@@ -651,20 +673,20 @@ Tip: I automatically detect and install npm packages from your code imports (lik
         setConversationContext(prev => ({
           ...prev,
           appliedCode: [...prev.appliedCode, {
-            files: [...(results.filesCreated || []), ...(results.filesUpdated || [])],
+            files: [...(data.results?.filesCreated || []), ...(data.results?.filesUpdated || [])],
             timestamp: new Date()
           }]
         }));
         
-        if (results.commandsExecuted?.length > 0) {
+        if (data.results?.commandsExecuted?.length > 0) {
           log('Commands executed:');
-          results.commandsExecuted.forEach((cmd: string) => {
+          data.results.commandsExecuted.forEach((cmd: string) => {
             log(`  $ ${cmd}`, 'command');
           });
         }
         
-        if (results.errors?.length > 0) {
-          results.errors.forEach((err: string) => {
+        if (data.results?.errors?.length > 0) {
+          data.results.errors.forEach((err: string) => {
             log(err, 'error');
           });
         }
@@ -677,22 +699,22 @@ Tip: I automatically detect and install npm packages from your code imports (lik
           log(data.explanation);
         }
         
-        if (data.autoCompleted) {
+        if ((data as any).autoCompleted) {
           log('Auto-generating missing components...', 'command');
           
-          if (data.autoCompletedComponents) {
+          if ((data as any).autoCompletedComponents) {
             setTimeout(() => {
               log('Auto-generated missing components:', 'info');
-              data.autoCompletedComponents.forEach((comp: string) => {
+              (data as any).autoCompletedComponents.forEach((comp: string) => {
                 log(`  ${comp}`, 'command');
               });
             }, 1000);
           }
-        } else if (data.warning) {
-          log(data.warning, 'error');
+        } else if ((data as any).warning) {
+          log((data as any).warning, 'error');
           
-          if (data.missingImports && data.missingImports.length > 0) {
-            const missingList = data.missingImports.join(', ');
+          if ((data as any).missingImports && (data as any).missingImports.length > 0) {
+            const missingList = (data as any).missingImports.join(', ');
             addChatMessage(
               `Ask me to "create the missing components: ${missingList}" to fix these import errors.`,
               'system'
@@ -702,7 +724,7 @@ Tip: I automatically detect and install npm packages from your code imports (lik
         
         log('Code applied successfully!');
         console.log('[applyGeneratedCode] Response data:', data);
-        console.log('[applyGeneratedCode] Debug info:', data.debug);
+        console.log('[applyGeneratedCode] Debug info:', (data as any).debug);
         console.log('[applyGeneratedCode] Current sandboxData:', sandboxData);
         console.log('[applyGeneratedCode] Current iframe element:', iframeRef.current);
         console.log('[applyGeneratedCode] Current iframe src:', iframeRef.current?.src);
@@ -1386,35 +1408,48 @@ Tip: I automatically detect and install npm packages from your code imports (lik
       }
       
       // Show sandbox iframe only when not in any loading state
-      if (sandboxData?.url && !loading) {
-        return (
-          <div className="relative w-full h-full">
-            <iframe
-              ref={iframeRef}
-              src={sandboxData.url}
-              className="w-full h-full border-none"
-              title="Open Lovable Sandbox"
-              allow="clipboard-write"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-            />
-            {/* Refresh button */}
-            <button
-              onClick={() => {
-                if (iframeRef.current && sandboxData?.url) {
-                  console.log('[Manual Refresh] Forcing iframe reload...');
-                  const newSrc = `${sandboxData.url}?t=${Date.now()}&manual=true`;
-                  iframeRef.current.src = newSrc;
-                }
-              }}
-              className="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-gray-700 p-2 rounded-lg shadow-lg transition-all duration-200 hover:scale-105"
-              title="Refresh sandbox"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
-          </div>
-        );
+		if (sandboxData?.url && !loading) {
+			return (
+				<div className="relative w-full h-full flex flex-col">
+					<div className="relative flex-1">
+						<iframe
+							ref={iframeRef}
+							src={sandboxData.url}
+							className="w-full h-full border-none"
+							title="Open Lovable Sandbox"
+							allow="clipboard-write"
+							sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+						/>
+						{/* Floating controls */}
+						<button
+							onClick={() => {
+								if (iframeRef.current && sandboxData?.url) {
+									const newSrc = `${sandboxData.url}?t=${Date.now()}&manual=true`;
+									iframeRef.current.src = newSrc;
+								}
+							}}
+							className="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-gray-700 p-2 rounded-lg shadow-lg transition-all duration-200 hover:scale-105"
+							title="Refresh sandbox"
+						>
+							<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+							</svg>
+						</button>
+						<button
+							onClick={() => setShowConsole(v => !v)}
+							className="absolute bottom-16 right-4 bg-white/90 hover:bg-white text-gray-700 px-3 py-1.5 rounded-lg shadow-lg transition-all duration-200 hover:scale-105 text-xs"
+							title="Toggle console"
+						>
+							{showConsole ? 'Hide Console' : 'Show Console'}
+						</button>
+					</div>
+					{showConsole && (
+						<div className="bg-gray-900 text-gray-300 font-mono text-xs p-3 border-t border-gray-700 h-40 overflow-y-auto">
+							{consoleOutput || 'No output yet...'}
+						</div>
+					)}
+				</div>
+			);
       }
       
       // Show loading animation when capturing screenshot
@@ -2975,11 +3010,11 @@ Focus on the key sections and content, making it clean and modern.`;
                     boxShadow: '0 0 0 1px #e3e1de66, 0 1px 2px #5f4a2e14'
                   }}
                 >
-                  {appConfig.ai.availableModels.map(model => (
-                    <option key={model} value={model}>
-                      {appConfig.ai.modelDisplayNames[model] || model}
-                    </option>
-                  ))}
+                    {appConfig.ai.availableModels.map(model => (
+                      <option key={model} value={model}>
+                        {appConfig.ai.modelDisplayNames[model as keyof typeof appConfig.ai.modelDisplayNames] || model}
+                      </option>
+                    ))}
                 </select>
               </div>
             </div>
@@ -3013,7 +3048,7 @@ Focus on the key sections and content, making it clean and modern.`;
           >
             {appConfig.ai.availableModels.map(model => (
               <option key={model} value={model}>
-                {appConfig.ai.modelDisplayNames[model] || model}
+                {appConfig.ai.modelDisplayNames[model as keyof typeof appConfig.ai.modelDisplayNames] || model}
               </option>
             ))}
           </select>

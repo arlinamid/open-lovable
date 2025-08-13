@@ -1,0 +1,28 @@
+{
+  "id": "session-1755089767295",
+  "createdAt": 1755089843299,
+  "updatedAt": 1755089843299,
+  "title": "Untitled Session",
+  "context": {
+    "conversationContext": {
+      "scrapedWebsites": [],
+      "generatedComponents": [],
+      "appliedCode": [],
+      "currentProject": ""
+    },
+    "messages": [
+      {
+        "content": "Welcome! I can help you generate code with full context of your sandbox files and structure. Just start chatting - I'll automatically create a sandbox for you if needed!\n\nTip: If you see package errors like \"react-router-dom not found\", just type \"npm install\" or \"check packages\" to automatically install missing packages.",
+        "type": "system",
+        "timestamp": "2025-08-13T12:56:48.236Z"
+      }
+    ],
+    "structure": "No sandbox created yet",
+    "sandboxData": {
+      "success": true,
+      "sandboxId": "i71xngquitw13cggd531y",
+      "url": "https://5173-i71xngquitw13cggd531y.e2b.app",
+      "message": "Sandbox created and Vite React app initialized"
+    }
+  }
+}

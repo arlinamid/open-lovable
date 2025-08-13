@@ -19,14 +19,32 @@ export default function SandboxPreview({
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [showConsole, setShowConsole] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
+  const [consoleOutput, setConsoleOutput] = useState<string>('');
 
   useEffect(() => {
     if (sandboxId && type !== 'console') {
-      // In production, this would be the actual E2B sandbox URL
-      // Format: https://{sandboxId}-{port}.e2b.dev
-      setPreviewUrl(`https://${sandboxId}-${port}.e2b.dev`);
+      // E2B production URL format: https://{port}-{sandboxId}.e2b.app
+      setPreviewUrl(`https://${port}-${sandboxId}.e2b.app`);
     }
   }, [sandboxId, port, type]);
+
+  useEffect(() => {
+    // Poll sandbox console logs if available and console is toggled
+    if (!sandboxId || type === 'console' || !showConsole) return;
+    let timer: any;
+    const fetchLogs = async () => {
+      try {
+        const res = await fetch('/api/sandbox-logs');
+        const data = await res.json();
+        if (data && data.logs) {
+          setConsoleOutput(Array.isArray(data.logs) ? data.logs.join('\n') : String(data.logs));
+        }
+      } catch {}
+      timer = setTimeout(fetchLogs, 2000);
+    };
+    fetchLogs();
+    return () => timer && clearTimeout(timer);
+  }, [sandboxId, type, showConsole]);
 
   const handleRefresh = () => {
     setIframeKey(prev => prev + 1);
@@ -36,7 +54,7 @@ export default function SandboxPreview({
     return (
       <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
         <div className="font-mono text-sm whitespace-pre-wrap text-gray-300">
-          {output || 'No output yet...'}
+          {output || consoleOutput || 'No output yet...'}
         </div>
       </div>
     );

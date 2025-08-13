@@ -21,6 +21,10 @@ const openai = createOpenAI({
   baseURL: process.env.OPENAI_BASE_URL,
 });
 
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
+
 // Schema for the AI's search plan - not file selection!
 const searchPlanSchema = z.object({
   editType: z.enum([
@@ -104,7 +108,7 @@ export async function POST(request: NextRequest) {
         aiModel = openai(model.replace('openai/', ''));
       }
     } else if (model.startsWith('google/')) {
-      aiModel = createGoogleGenerativeAI(model.replace('google/', ''));
+      aiModel = google(model.replace('google/', ''));
     } else {
       // Default to groq if model format is unclear
       aiModel = groq(model);

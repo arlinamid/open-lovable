@@ -249,7 +249,7 @@ else:
     # Continue anyway as it might still work
     `);
     
-    // Start Vite dev server
+    // Start Vite dev server and expose host
     console.log('[create-ai-sandbox] Starting Vite dev server...');
     await sandbox.runCode(`
 import subprocess
@@ -262,12 +262,12 @@ os.chdir('/home/user/app')
 subprocess.run(['pkill', '-f', 'vite'], capture_output=True)
 time.sleep(1)
 
-# Start Vite dev server
+# Start Vite dev server (hosted on 0.0.0.0 so it's accessible via tunnel)
 env = os.environ.copy()
 env['FORCE_COLOR'] = '0'
 
 process = subprocess.Popen(
-    ['npm', 'run', 'dev'],
+    ['npm', 'run', 'dev', '--', '--host'],
     stdout=subprocess.PIPE,
     stderr=subprocess.PIPE,
     env=env
