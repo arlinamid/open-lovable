@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { Sandbox } from '@e2b/code-interpreter';
 import type { SandboxState } from '@/types/sandbox';
 import { appConfig } from '@/config/app.config';
+import { createTimeoutManager, setGlobalTimeoutManager } from '@/lib/sandbox-timeout-manager';
 
 // Store active sandbox globally
 declare global {
@@ -303,9 +304,13 @@ print('✓ Tailwind CSS should be loaded')
       url: `https://${host}`
     };
     
+    // Create and set global timeout manager
+    const timeoutManager = createTimeoutManager(sandbox);
+    setGlobalTimeoutManager(timeoutManager);
+    
     // Set extended timeout on the sandbox instance if method available
     if (typeof sandbox.setTimeout === 'function') {
-      sandbox.setTimeout(appConfig.e2b.timeoutMs);
+      await sandbox.setTimeout(appConfig.e2b.timeoutMs);
       console.log(`[create-ai-sandbox] Set sandbox timeout to ${appConfig.e2b.timeoutMinutes} minutes`);
     }
     

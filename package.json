@@ -11,7 +11,11 @@
     "test:integration": "node tests/e2b-integration.test.js",
     "test:api": "node tests/api-endpoints.test.js",
     "test:code": "node tests/code-execution.test.js",
-    "test:all": "npm run test:integration && npm run test:api && npm run test:code"
+    "test:all": "npm run test:integration && npm run test:api && npm run test:code",
+    "test:supabase": "node scripts/test-supabase.js",
+    "test:crawling": "node scripts/test-advanced-crawling.js",
+    "test:images": "node scripts/test-image-extraction.js",
+    "test:timeout": "node scripts/test-sandbox-timeout.js"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.1",
@@ -22,6 +26,7 @@
     "@e2b/code-interpreter": "^1.5.1",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.5",
+    "@supabase/supabase-js": "^2.55.0",
     "@tailwindcss/oxide-win32-x64-msvc": "^4.1.11",
     "@types/react-syntax-highlighter": "^15.5.13",
     "ai": "^5.0.0",

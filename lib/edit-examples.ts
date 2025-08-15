@@ -184,6 +184,189 @@ NOTICE: Everything remains EXACTLY the same except 'bg-gray-900' → 'bg-blue-50
 - All text, structure, imports are identical
 - No reformatting, no "improvements", no cleanup
 
+### Example 10: Add Responsive Image with Proper Styling
+USER: "add a hero image to the header"
+
+CORRECT APPROACH:
+1. Find the Header component
+2. Add an optimized image with proper responsive classes
+3. Include alt text and loading optimization
+4. Use appropriate sizing and positioning
+
+**Expected Output:**
+<file path="src/components/Header.jsx">
+import React from 'react';
+
+export default function Header() {
+  return (
+    <header className="relative w-full bg-white shadow-md">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <img 
+              src="/images/logo.png" 
+              alt="Company Logo" 
+              className="w-12 h-12 object-contain"
+              loading="eager"
+            />
+            <h1 className="text-2xl font-bold text-gray-900">Company Name</h1>
+          </div>
+          
+          {/* Hero Image */}
+          <div className="relative w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64">
+            <img 
+              src="/images/hero-image.jpg" 
+              alt="Hero illustration showing our product in action" 
+              className="w-full h-full object-cover rounded-lg shadow-lg"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+</file>
+
+### Example 11: Create Responsive Grid Layout
+USER: "create a product grid with images"
+
+CORRECT APPROACH:
+1. Use CSS Grid for responsive layout
+2. Include proper image optimization
+3. Add hover effects and transitions
+4. Ensure accessibility with alt text
+
+**Expected Output:**
+<file path="src/components/ProductGrid.jsx">
+import React from 'react';
+
+export default function ProductGrid({ products }) {
+  return (
+    <section className="max-w-7xl mx-auto px-4 py-12">
+      <h2 className="text-3xl font-bold text-center mb-12">Our Products</h2>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {products.map((product) => (
+          <article 
+            key={product.id} 
+            className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105"
+          >
+            <div className="relative aspect-square">
+              <img 
+                src={product.image} 
+                alt={product.name}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+            </div>
+            
+            <div className="p-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{product.name}</h3>
+              <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
+              <div className="flex items-center justify-between">
+                <span className="text-xl font-bold text-blue-600">{product.price}</span>
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+</file>
+
+### Example 12: Add Animated Hero Section
+USER: "add an animated hero with background image"
+
+CORRECT APPROACH:
+1. Use Framer Motion for animations
+2. Include background image with proper overlay
+3. Add responsive text sizing
+4. Include proper image optimization
+
+**Expected Output:**
+<file path="src/components/AnimatedHero.jsx">
+import React from 'react';
+import { motion } from 'framer-motion';
+
+export default function AnimatedHero() {
+  return (
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="/images/hero-bg.jpg" 
+          alt="Hero background showing modern workspace"
+          className="w-full h-full object-cover"
+          loading="eager"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-purple-900/80"></div>
+      </div>
+      
+      {/* Content */}
+      <div className="relative z-10 max-w-4xl mx-auto px-4 text-center text-white">
+        <motion.h1 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight"
+        >
+          Build Something
+          <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+            Amazing
+          </span>
+        </motion.h1>
+        
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-lg md:text-xl mb-8 text-gray-200 max-w-2xl mx-auto"
+        >
+          Create stunning websites with modern design patterns and cutting-edge technology.
+        </motion.p>
+        
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="flex flex-col sm:flex-row gap-4 justify-center"
+        >
+          <button className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all duration-300 hover:scale-105 shadow-lg">
+            Get Started
+          </button>
+          <button className="px-8 py-4 border-2 border-white text-white hover:bg-white hover:text-gray-900 rounded-lg font-semibold transition-all duration-300">
+            Learn More
+          </button>
+        </motion.div>
+      </div>
+      
+      {/* Scroll Indicator */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 1 }}
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+      >
+        <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
+          <motion.div 
+            animate={{ y: [0, 12, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="w-1 h-3 bg-white rounded-full mt-2"
+          ></motion.div>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+</file>
+
 ## Key Principles
 
 1. **Minimal Changes**: Only modify what's necessary

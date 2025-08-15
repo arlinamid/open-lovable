@@ -87,6 +87,9 @@ function buildSystemPrompt(
     sections.push(getEditExamplesPrompt());
   }
   
+  // Add enhanced styling and layout guidance
+  sections.push(getEnhancedStylingPrompt());
+  
   // Add edit intent section
   sections.push(`## Edit Intent
 Type: ${editIntent.type}
@@ -360,4 +363,76 @@ function getFileExtension(path: string): string {
     'json': 'json',
   };
   return mapping[ext] || ext;
+}
+
+/**
+ * Enhanced styling and layout guidance for AI
+ */
+export function getEnhancedStylingPrompt(): string {
+  return `
+## 🎨 ENHANCED STYLING & LAYOUT GUIDELINES
+
+### Image Handling & Placement
+- **Responsive Images**: Use \`w-full h-auto\` or specific responsive classes like \`w-full md:w-1/2 lg:w-1/3\`
+- **Image Dimensions**: Always specify appropriate dimensions: \`w-[800px] h-[600px]\` or \`w-full max-w-md\`
+- **Image Optimization**: Use \`object-cover\`, \`object-contain\`, or \`object-fill\` for proper scaling
+- **Lazy Loading**: Add \`loading="lazy"\` for better performance
+- **Alt Text**: Always include descriptive alt text for accessibility
+- **Image Containers**: Wrap images in \`relative\` containers for overlays or positioning
+
+### Advanced Layout Techniques
+- **Grid Systems**: Use \`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\` for responsive grids
+- **Flexbox Layouts**: Use \`flex flex-col md:flex-row items-center justify-between\` for flexible layouts
+- **Aspect Ratios**: Use \`aspect-video\`, \`aspect-square\`, or custom \`aspect-[16/9]\`
+- **Container Queries**: Use \`@container\` for component-based responsive design
+- **Sticky Positioning**: Use \`sticky top-0\` for navigation or important elements
+
+### Color & Typography
+- **Color Palettes**: Use semantic color classes: \`text-primary\`, \`bg-secondary\`, \`border-accent\`
+- **Gradients**: Use \`bg-gradient-to-r from-blue-500 to-purple-600\` for modern gradients
+- **Typography Scale**: Use \`text-xs\` to \`text-9xl\` with proper hierarchy
+- **Font Weights**: Use \`font-light\`, \`font-normal\`, \`font-medium\`, \`font-bold\`, \`font-black\`
+- **Line Heights**: Use \`leading-tight\`, \`leading-normal\`, \`leading-relaxed\` for readability
+
+### Spacing & Sizing
+- **Consistent Spacing**: Use Tailwind's spacing scale: \`p-4\`, \`m-6\`, \`gap-8\`
+- **Responsive Spacing**: Use \`p-4 md:p-6 lg:p-8\` for adaptive spacing
+- **Container Sizing**: Use \`max-w-7xl mx-auto\` for centered content
+- **Viewport Units**: Use \`min-h-screen\`, \`w-screen\` for full viewport sizing
+
+### Interactive Elements
+- **Hover States**: Use \`hover:bg-blue-600 hover:scale-105 transition-all\`
+- **Focus States**: Use \`focus:ring-2 focus:ring-blue-500 focus:outline-none\`
+- **Active States**: Use \`active:scale-95\` for button interactions
+- **Transitions**: Use \`transition-all duration-300 ease-in-out\` for smooth animations
+
+### Component Structure Best Practices
+- **Semantic HTML**: Use proper tags: \`<header>\`, \`<main>\`, \`<section>\`, \`<article>\`, \`<footer>\`
+- **Accessibility**: Include \`aria-label\`, \`role\`, and proper heading hierarchy
+- **SEO Optimization**: Use \`<meta>\` tags and structured data where appropriate
+- **Performance**: Use \`loading="lazy"\` and optimize images with proper formats
+
+### Responsive Design Patterns
+- **Mobile-First**: Start with mobile styles, then add \`md:\`, \`lg:\`, \`xl:\` breakpoints
+- **Breakpoint Strategy**: Use \`sm: 640px\`, \`md: 768px\`, \`lg: 1024px\`, \`xl: 1280px\`, \`2xl: 1536px\`
+- **Flexible Images**: Use \`w-full h-auto\` with \`max-w-md\` containers
+- **Adaptive Typography**: Use \`text-lg md:text-xl lg:text-2xl\` for responsive text
+
+### Animation & Micro-interactions
+- **Framer Motion**: Use \`motion.div\` with \`initial\`, \`animate\`, \`exit\` props
+- **CSS Transitions**: Use \`transition-all duration-300\` for smooth state changes
+- **Hover Effects**: Use \`hover:translate-y-[-2px] hover:shadow-lg\` for subtle interactions
+- **Loading States**: Use \`animate-pulse\` or \`animate-spin\` for loading indicators
+
+### Dark Mode Support
+- **Theme Classes**: Use \`dark:bg-gray-900 dark:text-white\` for dark mode
+- **Color Variables**: Use CSS custom properties for theme-aware colors
+- **System Preference**: Respect user's system preference with \`prefers-color-scheme\`
+
+### Performance Optimization
+- **Image Optimization**: Use \`next/image\` or \`loading="lazy"\` for better performance
+- **CSS Purge**: Ensure unused styles are removed in production
+- **Critical CSS**: Inline critical styles for above-the-fold content
+- **Font Loading**: Use \`font-display: swap\` for better font loading performance
+`;
 }

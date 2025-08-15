@@ -12,6 +12,19 @@ export const appConfig = {
       return this.timeoutMinutes * 60 * 1000;
     },
     
+    // Process timeout for individual commands (in milliseconds)
+    processTimeout: 30000, // 30 seconds for individual processes
+    
+    // Connection timeout for sandbox operations (in milliseconds)
+    connectionTimeout: 15000, // 15 seconds for connection operations
+    
+    // Retry configuration for sandbox operations
+    maxRetries: 3,
+    retryDelay: 2000, // 2 seconds between retries
+    
+    // Auto-extend timeout before expiration (in minutes)
+    autoExtendThreshold: 5, // Extend timeout 5 minutes before expiration
+    
     // Vite development server port
     vitePort: 5173,
     

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { parseJavaScriptFile, buildComponentTree } from '@/lib/file-parser';
 import { FileManifest, FileInfo, RouteInfo } from '@/types/file-manifest';
 import type { SandboxState } from '@/types/sandbox';
+import { getGlobalTimeoutManager } from '@/lib/sandbox-timeout-manager';
 
 declare global {
   var activeSandbox: any;
@@ -18,8 +19,12 @@ export async function GET() {
 
     console.log('[get-sandbox-files] Fetching and analyzing file structure...');
     
-    // Get all React/JS/CSS files
-    const result = await global.activeSandbox.runCode(`
+    // Use timeout manager if available, otherwise fall back to direct execution
+    const timeoutManager = getGlobalTimeoutManager();
+    let result;
+    
+    if (timeoutManager) {
+      result = await timeoutManager.executeCodeWithTimeout(`
 import os
 import json
 
@@ -66,7 +71,58 @@ result = {
 }
 
 print(json.dumps(result))
-    `);
+      `);
+    } else {
+      // Fallback to direct execution
+      result = await global.activeSandbox.runCode(`
+import os
+import json
+
+def get_files_content(directory='/home/user/app', extensions=['.jsx', '.js', '.tsx', '.ts', '.css', '.json']):
+    files_content = {}
+    
+    for root, dirs, files in os.walk(directory):
+        # Skip node_modules and other unwanted directories
+        dirs[:] = [d for d in dirs if d not in ['node_modules', '.git', 'dist', 'build']]
+        
+        for file in files:
+            if any(file.endswith(ext) for ext in extensions):
+                file_path = os.path.join(root, file)
+                relative_path = os.path.relpath(file_path, '/home/user/app')
+                
+                try:
+                    with open(file_path, 'r') as f:
+                        content = f.read()
+                        # Only include files under 10KB to avoid huge responses
+                        if len(content) < 10000:
+                            files_content[relative_path] = content
+                except:
+                    pass
+    
+    return files_content
+
+# Get the files
+files = get_files_content()
+
+# Also get the directory structure
+structure = []
+for root, dirs, files in os.walk('/home/user/app'):
+    level = root.replace('/home/user/app', '').count(os.sep)
+    indent = ' ' * 2 * level
+    structure.append(f"{indent}{os.path.basename(root)}/")
+    sub_indent = ' ' * 2 * (level + 1)
+    for file in files:
+        if not any(skip in root for skip in ['node_modules', '.git', 'dist', 'build']):
+            structure.append(f"{sub_indent}{file}")
+
+result = {
+    'files': files,
+    'structure': '\\n'.join(structure[:50])  # Limit structure to 50 lines
+}
+
+print(json.dumps(result))
+      `);
+    }
 
     const output = result.logs.stdout.join('');
     const parsedResult = JSON.parse(output);

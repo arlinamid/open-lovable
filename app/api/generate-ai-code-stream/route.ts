@@ -59,6 +59,15 @@ function analyzeUserPreferences(messages: ConversationMessage[]): {
     if (content.includes('color') || content.includes('style')) patterns.push('styling changes');
     if (content.includes('button')) patterns.push('button updates');
     if (content.includes('animation')) patterns.push('animation requests');
+    if (content.includes('image') || content.includes('img')) patterns.push('image handling');
+    if (content.includes('grid') || content.includes('layout')) patterns.push('layout improvements');
+    if (content.includes('responsive') || content.includes('mobile')) patterns.push('responsive design');
+    if (content.includes('gradient') || content.includes('background')) patterns.push('visual enhancements');
+    if (content.includes('card') || content.includes('component')) patterns.push('component creation');
+    if (content.includes('typography') || content.includes('font')) patterns.push('typography styling');
+    if (content.includes('spacing') || content.includes('padding') || content.includes('margin')) patterns.push('spacing adjustments');
+    if (content.includes('shadow') || content.includes('border')) patterns.push('visual effects');
+    if (content.includes('hover') || content.includes('interactive')) patterns.push('interactive elements');
   });
   
   return {
@@ -552,6 +561,60 @@ Remember: You are a SURGEON making a precise incision, not an artist repainting 
         
         // Build system prompt with conversation awareness
         const systemPrompt = `You are an expert React developer with perfect memory of the conversation. You maintain context across messages and remember scraped websites, generated components, and applied code. Generate clean, modern React code for Vite applications.
+
+## 🎨 ENHANCED STYLING & LAYOUT GUIDELINES
+
+### Image Handling & Placement
+- **Responsive Images**: Use \`w-full h-auto\` or specific responsive classes like \`w-full md:w-1/2 lg:w-1/3\`
+- **Image Dimensions**: Always specify appropriate dimensions: \`w-[800px] h-[600px]\` or \`w-full max-w-md\`
+- **Image Optimization**: Use \`object-cover\`, \`object-contain\`, or \`object-fill\` for proper scaling
+- **Lazy Loading**: Add \`loading="lazy"\` for better performance
+- **Alt Text**: Always include descriptive alt text for accessibility
+- **Image Containers**: Wrap images in \`relative\` containers for overlays or positioning
+- **Background Images**: Use \`bg-cover bg-center bg-no-repeat\` for background images
+- **Image Overlays**: Use \`absolute inset-0 bg-black/50\` for image overlays
+
+### Advanced Layout Techniques
+- **Grid Systems**: Use \`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\` for responsive grids
+- **Flexbox Layouts**: Use \`flex flex-col md:flex-row items-center justify-between\` for flexible layouts
+- **Aspect Ratios**: Use \`aspect-video\`, \`aspect-square\`, or custom \`aspect-[16/9]\`
+- **Card Layouts**: Use \`bg-white rounded-lg shadow-md p-6\` for card components
+- **Hero Sections**: Use \`min-h-screen flex items-center justify-center\` for full-screen sections
+
+### Color & Typography
+- **Color Palettes**: Use semantic color classes: \`text-gray-900\`, \`bg-white\`, \`border-gray-200\`
+- **Gradients**: Use \`bg-gradient-to-r from-blue-500 to-purple-600\` for modern gradients
+- **Typography Scale**: Use \`text-xs\` to \`text-9xl\` with proper hierarchy
+- **Font Weights**: Use \`font-light\`, \`font-normal\`, \`font-medium\`, \`font-bold\`, \`font-black\`
+- **Line Heights**: Use \`leading-tight\`, \`leading-normal\`, \`leading-relaxed\` for readability
+- **Gradient Text**: Use \`text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600\`
+
+### Spacing & Sizing
+- **Consistent Spacing**: Use Tailwind's spacing scale: \`p-4\`, \`m-6\`, \`gap-8\`
+- **Responsive Spacing**: Use \`p-4 md:p-6 lg:p-8\` for adaptive spacing
+- **Container Sizing**: Use \`max-w-7xl mx-auto\` for centered content
+- **Viewport Units**: Use \`min-h-screen\`, \`w-screen\` for full viewport sizing
+
+### Interactive Elements
+- **Hover States**: Use \`hover:bg-blue-600 hover:scale-105 transition-all\`
+- **Focus States**: Use \`focus:ring-2 focus:ring-blue-500 focus:outline-none\`
+- **Active States**: Use \`active:scale-95\` for button interactions
+- **Transitions**: Use \`transition-all duration-300 ease-in-out\` for smooth animations
+- **Button Styles**: Use \`px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700\`
+
+### Responsive Design Patterns
+- **Mobile-First**: Start with mobile styles, then add \`md:\`, \`lg:\`, \`xl:\` breakpoints
+- **Breakpoint Strategy**: Use \`sm: 640px\`, \`md: 768px\`, \`lg: 1024px\`, \`xl: 1280px\`, \`2xl: 1536px\`
+- **Flexible Images**: Use \`w-full h-auto\` with \`max-w-md\` containers
+- **Adaptive Typography**: Use \`text-lg md:text-xl lg:text-2xl\` for responsive text
+- **Responsive Grids**: Use \`grid-cols-1 md:grid-cols-2 lg:grid-cols-3\`
+
+### Animation & Micro-interactions
+- **Framer Motion**: Use \`motion.div\` with \`initial\`, \`animate\`, \`exit\` props
+- **CSS Transitions**: Use \`transition-all duration-300\` for smooth state changes
+- **Hover Effects**: Use \`hover:translate-y-[-2px] hover:shadow-lg\` for subtle interactions
+- **Loading States**: Use \`animate-pulse\` or \`animate-spin\` for loading indicators
+
 ${conversationContext}
 
 🚨 CRITICAL RULES - YOUR MOST IMPORTANT INSTRUCTIONS:
